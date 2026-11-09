@@ -50,7 +50,9 @@ GameTests are separate from the shipped JAR. The dedicated test run directory is
 `run-gametest/`; its Waystones configuration is regenerated with protection enabled.
 Tests exercise real Waystone blocks and the level destruction/replacement APIs.
 The protection tests are expected to fail on the current unpatched baseline;
-the player-placed control should pass. These are API-level regression tests,
+the player-placed and protection-disabled controls should pass. Protection tests
+check both halves, block entity identity, registered destination preservation,
+return values, and absence of dropped items. These are API-level regression tests,
 not yet a reproduction with GregTech or Apotheosis tools installed.
 
 Current environment blocker: the Gradle wrapper cannot resolve
