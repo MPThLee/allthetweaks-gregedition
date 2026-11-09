@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+group = 'dev.mpthlee.allthetweaks'
+version = '0.1.0'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+}
+configurations {
+    gametestImplementation.extendsFrom implementation
+    gametestRuntimeOnly.extendsFrom runtimeOnly
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods {
+                allthetweaks_gregedition { source sourceSets.main }
+            }
+        }
+        server { args '--nogui' }
+        client {}
+        gameTestServer {
+            workingDirectory project.file('run-gametest')
+            property 'forge.enabledGameTestNamespaces', 'allthetweaks_gregedition'
+            mods {
+                allthetweaks_gregedition { source sourceSets.gametest }
+            }
+        }
+    }
+}
+
+repositories {
+    maven { url = 'https://api.modrinth.com/maven' }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+    implementation fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
+    runtimeOnly fg.deobf('maven.modrinth:balm:7.3.38+forge-1.20.1')
+}
+
+tasks.named('jar', Jar) {
+    finalizedBy 'reobfJar'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+tasks.register('prepareWaystoneRegressionConfig') {
+    doLast {
+        def configFile = file('run-gametest/config/waystones-common.toml')
+        configFile.parentFile.mkdirs()
+        configFile.text = '''[restrictions]
+generatedWaystonesUnbreakable = true
+restrictToCreative = false
+'''
+    }
+}
+tasks.matching { it.name == 'runGameTestServer' }.configureEach {
+    dependsOn 'prepareWaystoneRegressionConfig'
+}
