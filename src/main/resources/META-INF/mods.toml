@@ -6,7 +6,7 @@ license="All Rights Reserved"
 modId="allthetweaks_gregedition"
 version="0.1.0"
 displayName="All The Tweaks: Greg Edition"
-description='''Independent, configurable mod compatibility fixes. Currently a development scaffold.'''
+description='''Independent, configurable compatibility fixes. Protects generated Waystones from AoE mining when Waystones' unbreakable setting is enabled.'''
 displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.allthetweaks_gregedition]]

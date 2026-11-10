@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.mpthlee.allthetweaks.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "allthetweaks_gregedition.refmap.json",
+  "mixins": ["LevelChunkMixin", "LevelMixin", "WaystoneBlockMixin", "BlockLootMixin"],
+  "injectors": { "defaultRequire": 1 }
+}

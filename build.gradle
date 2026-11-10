@@ -1,14 +1,27 @@
+buildscript {
+    repositories { maven { url = 'https://maven.minecraftforge.net/' } }
+    dependencies { classpath 'org.spongepowered:mixingradle:0.7.38' }
+}
+
 plugins {
     id 'java'
-    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'net.minecraftforge.gradle' version '6.0.54'
 }
+apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.mpthlee.allthetweaks'
 version = '0.1.0'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+def forgeVersion = providers.gradleProperty('forgeVersion').getOrElse('47.3.0')
+def balmVersion = providers.gradleProperty('balmVersion').getOrElse('7.3.38')
+def gameTestDir = file('run-gametest/' + (providers.gradleProperty('withoutWaystones').isPresent()
+        ? 'without-waystones' : 'with-waystones'))
 
 sourceSets {
     gametest {
+        if (providers.gradleProperty('withoutWaystones').isPresent()) {
+            java.setSrcDirs(['src/smoke/java'])
+        }
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
@@ -20,10 +33,11 @@ configurations {
 
 minecraft {
     mappings channel: 'official', version: '1.20.1'
-    copyIdeResources = true
     runs {
         configureEach {
             workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
             property 'forge.logging.console.level', 'info'
             mods {
                 allthetweaks_gregedition { source sourceSets.main }
@@ -32,7 +46,7 @@ minecraft {
         server { args '--nogui' }
         client {}
         gameTestServer {
-            workingDirectory project.file('run-gametest')
+            workingDirectory gameTestDir
             property 'forge.enabledGameTestNamespaces', 'allthetweaks_gregedition'
             mods {
                 allthetweaks_gregedition { source sourceSets.gametest }
@@ -42,30 +56,55 @@ minecraft {
 }
 
 repositories {
-    maven { url = 'https://api.modrinth.com/maven' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup 'maven.modrinth' }
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
-    implementation fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
-    runtimeOnly fg.deobf('maven.modrinth:balm:7.3.38+forge-1.20.1')
+    minecraft "net.minecraftforge:forge:1.20.1-${forgeVersion}"
+    compileOnly fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
+    compileOnly fg.deobf("maven.modrinth:balm:${balmVersion}+forge-1.20.1")
+    if (!providers.gradleProperty('withoutWaystones').isPresent()) {
+        runtimeOnly fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
+        runtimeOnly fg.deobf("maven.modrinth:balm:${balmVersion}+forge-1.20.1")
+    }
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, 'allthetweaks_gregedition.refmap.json'
+    config 'allthetweaks_gregedition.mixins.json'
 }
 
 tasks.named('jar', Jar) {
+    manifest.attributes('MixinConfigs': 'allthetweaks_gregedition.mixins.json')
     finalizedBy 'reobfJar'
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 
 tasks.register('prepareWaystoneRegressionConfig') {
     doLast {
-        def configFile = file('run-gametest/config/waystones-common.toml')
+        // Only generated regression worlds live here; never reuse a modded world for the optional-mod test.
+        delete new File(gameTestDir, 'world')
+        def configFile = new File(gameTestDir, 'config/waystones-common.toml')
         configFile.parentFile.mkdirs()
         configFile.text = '''[restrictions]
 generatedWaystonesUnbreakable = true
 restrictToCreative = false
 '''
+        new File(gameTestDir, 'config/allthetweaks_gregedition-common.toml').text =
+                "[tweaks]\nwaystoneProtection = ${providers.gradleProperty('protectionEnabled').getOrElse('true')}\n"
     }
 }
 tasks.matching { it.name == 'runGameTestServer' }.configureEach {
     dependsOn 'prepareWaystoneRegressionConfig'
+    doLast {
+        def log = new File(gameTestDir, 'logs/latest.log').text
+        def expected = sourceSets.gametest.allJava.files.sum { it.text.count('@GameTest(') }
+        if (!expected || !log.contains("All ${expected} required tests passed")) {
+            throw new GradleException("Expected ${expected} passing GameTests; inspect ${gameTestDir}/logs/latest.log")
+        }
+    }
 }

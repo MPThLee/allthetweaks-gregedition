@@ -8,11 +8,11 @@ public final class TweaksConfig {
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
-        builder.comment("Independent compatibility fixes. See README for implementation status.")
+        builder.comment("Independent compatibility fixes.")
                 .push("tweaks");
         WAYSTONE_PROTECTION = builder
                 .comment("Enable the Waystones protection fix. Requires Waystones.",
-                        "Reserved for the first fix; protection is not implemented yet.")
+                        "Honors Waystones' generatedWaystonesUnbreakable setting.")
                 .define("waystoneProtection", true);
         builder.pop();
         SPEC = builder.build();
