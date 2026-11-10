@@ -95,9 +95,17 @@ Balm 7.3.38, EvilCraft 1.3.5, Cyclops Core 1.22.3, and Forge 47.3.0.
 ./gradlew runGameTestServer
 ./gradlew runGameTestServer -PwithoutOptionalMods
 ./gradlew runGameTestServer -PforgeVersion=47.4.10 -PbalmVersion=7.3.44
+# Interactive AoE testing with GregTech CEu 7.5.3 and JEI 15.59.0.210:
+./gradlew runClient -PforgeVersion=47.4.10 -PbalmVersion=7.3.44 -PaoeTestClient
 # Full disabled/enabled/optional-dependency verification:
 ./scripts/verify.sh
 ```
+
+The `aoeTestClient` flag adds development runtime dependencies only. It does not
+bundle GregTech or JEI in the release. For manual Waystone tests, enable generated
+Waystone protection in `run/config/waystones-common.toml`, use a generated Waystone,
+and mine adjacent blocks with a mining hammer in Survival. Creative mining is
+intentionally allowed, and player-placed Waystones are outside this protection.
 
 The verification script requires separate disabled-tweak runs to reproduce both the AoE
 and broom flight failures, then builds the JAR and requires the enabled suite and optional-dependency
