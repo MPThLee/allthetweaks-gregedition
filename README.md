@@ -178,3 +178,22 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Each fix lives under its own
 `dev.mpthlee.allthetweaks.tweak.<name>` package with an independent configuration
 switch, hooks, mixin configuration, and regression tests. The mod entry point only
 registers configuration and delegates lifecycle work to the explicit tweak registry.
+
+## Automated builds and releases
+
+GitHub Actions builds and runs `scripts/verify.sh` on branch pushes, pull requests,
+and version tags. You can also start it manually from the Actions tab. Successful
+runs provide a `release-jar` artifact containing the reobfuscated mod JAR and its
+SHA-256 checksum. Verification logs are uploaded even when a check fails.
+
+To publish a release, update `version` in `build.gradle`, commit and push it, then
+push a matching tag (for example, `v0.2.2` for version `0.2.2`):
+
+```sh
+git tag v0.2.2
+git push origin v0.2.2
+```
+
+The tag must match the built JAR's version. After all checks pass, Actions creates
+a GitHub release with generated notes, the tested JAR, and `SHA256SUMS.txt`. No
+extra repository secret is required; publishing uses GitHub's built-in token.
