@@ -1,4 +1,4 @@
-package dev.mpthlee.allthetweaks.compat;
+package dev.mpthlee.allthetweaks.tweak.waystones;
 
 import net.blay09.mods.waystones.api.WaystoneOrigin;
 import net.blay09.mods.waystones.block.WaystoneBlockBase;

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.mpthlee.allthetweaks.tweak.broom.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "allthetweaks_gregedition.refmap.json",
+  "mixins": [
+    "BroomFlightMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

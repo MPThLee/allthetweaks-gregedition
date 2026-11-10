@@ -1,6 +1,6 @@
-package dev.mpthlee.allthetweaks.mixin;
+package dev.mpthlee.allthetweaks.tweak.waystones.mixin;
 
-import dev.mpthlee.allthetweaks.Protection;
+import dev.mpthlee.allthetweaks.tweak.waystones.WaystoneProtection;
 import net.blay09.mods.waystones.block.WaystoneBlockBase;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -18,9 +18,9 @@ public abstract class WaystoneBlockMixin {
     @Inject(method = "playerWillDestroy", at = @At("HEAD"), cancellable = true)
     private void att$protectBeforeSideEffects(Level world, BlockPos pos, BlockState state, Player player,
                                               CallbackInfo ci) {
-        if (world.isClientSide || !Protection.isProtected(world, pos, state)) return;
+        if (world.isClientSide || !WaystoneProtection.isProtected(world, pos, state)) return;
         if (player.isCreative()) {
-            Protection.creativeBreak(world, pos, state, () -> {
+            WaystoneProtection.creativeBreak(world, pos, state, () -> {
                 state.getBlock().playerWillDestroy(world, pos, state, player);
                 return null;
             });

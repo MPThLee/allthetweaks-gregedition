@@ -1,6 +1,6 @@
-package dev.mpthlee.allthetweaks.mixin;
+package dev.mpthlee.allthetweaks.tweak.waystones.mixin;
 
-import dev.mpthlee.allthetweaks.Protection;
+import dev.mpthlee.allthetweaks.tweak.waystones.WaystoneProtection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -17,11 +17,11 @@ public abstract class LevelMixin {
     private void att$protectDestruction(BlockPos pos, boolean drop, Entity actor, int recursion,
                                        CallbackInfoReturnable<Boolean> cir) {
         Level world = (Level) (Object) this;
-        if (!Protection.enabled() || world.isClientSide) return;
+        if (!WaystoneProtection.enabled() || world.isClientSide) return;
         var state = world.getBlockState(pos);
-        if (!Protection.isProtected(world, pos, state)) return;
+        if (!WaystoneProtection.isProtected(world, pos, state)) return;
         if (actor instanceof Player player && player.isCreative()) {
-            cir.setReturnValue(Protection.creativeBreak(world, pos, state,
+            cir.setReturnValue(WaystoneProtection.creativeBreak(world, pos, state,
                     () -> world.destroyBlock(pos, drop, actor, recursion)));
         } else {
             // Cancel before Level creates drops, particles, or invokes block callbacks.

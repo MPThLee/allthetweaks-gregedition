@@ -1,6 +1,6 @@
-package dev.mpthlee.allthetweaks.mixin;
+package dev.mpthlee.allthetweaks.tweak.waystones.mixin;
 
-import dev.mpthlee.allthetweaks.Protection;
+import dev.mpthlee.allthetweaks.tweak.waystones.WaystoneProtection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -19,9 +19,9 @@ public abstract class BlockLootMixin {
     @Inject(method = "getDrops", at = @At("HEAD"), cancellable = true)
     private void att$preventDuplicateDrops(BlockState state, LootParams.Builder loot,
                                            CallbackInfoReturnable<List<ItemStack>> cir) {
-        if (!Protection.isCandidate(state)) return;
+        if (!WaystoneProtection.isCandidate(state)) return;
         var origin = loot.getOptionalParameter(LootContextParams.ORIGIN);
-        if (origin != null && Protection.isProtected(loot.getLevel(), BlockPos.containing(origin), state)) {
+        if (origin != null && WaystoneProtection.isProtected(loot.getLevel(), BlockPos.containing(origin), state)) {
             cir.setReturnValue(List.of());
         }
     }

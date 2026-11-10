@@ -1,4 +1,9 @@
-package dev.mpthlee.allthetweaks;
+package dev.mpthlee.allthetweaks.tweak.waystones;
+
+import dev.mpthlee.allthetweaks.AllTheTweaks;
+import dev.mpthlee.allthetweaks.TweaksConfig;
+
+import dev.mpthlee.allthetweaks.tweak.waystones.WaystoneProtection;
 
 import net.blay09.mods.waystones.api.WaystoneOrigin;
 import net.blay09.mods.waystones.block.ModBlocks;
@@ -108,14 +113,14 @@ public final class WaystoneProtectionTests {
         boolean original = TweaksConfig.WAYSTONE_PROTECTION.get();
         try {
             TweaksConfig.WAYSTONE_PROTECTION.set(false);
-            Protection.refresh();
+            WaystoneProtection.refresh();
             for (BlockPos pos : new BlockPos[]{lower, lower.above()}) {
                 helper.getLevel().setBlock(pos, helper.getLevel().getBlockState(pos)
                         .setValue(WaystoneBlockBase.ORIGIN, WaystoneOrigin.UNKNOWN), 2);
             }
         } finally {
             TweaksConfig.WAYSTONE_PROTECTION.set(original);
-            Protection.refresh();
+            WaystoneProtection.refresh();
         }
         helper.assertTrue(!helper.getLevel().destroyBlock(lower, true), "Legacy generated Waystone was removed");
         helper.succeed();
@@ -136,7 +141,7 @@ public final class WaystoneProtectionTests {
         var state = helper.getLevel().getBlockState(lower);
         RuntimeException sentinel = new RuntimeException("test sentinel");
         try {
-            Protection.creativeBreak(helper.getLevel(), lower, state, () -> { throw sentinel; });
+            WaystoneProtection.creativeBreak(helper.getLevel(), lower, state, () -> { throw sentinel; });
         } catch (RuntimeException expected) {
             if (expected != sentinel) throw expected;
         }
@@ -159,7 +164,7 @@ public final class WaystoneProtectionTests {
                 for (int phase = 0; phase < 2; phase++) {
                     boolean active = (round & 1) == phase;
                     TweaksConfig.WAYSTONE_PROTECTION.set(active);
-                    Protection.refresh();
+                    WaystoneProtection.refresh();
                     long start = System.nanoTime();
                     for (int i = 0; i < 20000; i++) chunk.setBlockState(pos, (i & 1) == 0 ? dirt : stone, false);
                     long elapsed = System.nanoTime() - start;
@@ -169,7 +174,7 @@ public final class WaystoneProtectionTests {
             }
         } finally {
             TweaksConfig.WAYSTONE_PROTECTION.set(original);
-            Protection.refresh();
+            WaystoneProtection.refresh();
         }
         java.util.Arrays.sort(disabled);
         java.util.Arrays.sort(enabled);
@@ -220,12 +225,12 @@ public final class WaystoneProtectionTests {
         boolean original = TweaksConfig.WAYSTONE_PROTECTION.get();
         try {
             TweaksConfig.WAYSTONE_PROTECTION.set(false);
-            Protection.refresh();
+            WaystoneProtection.refresh();
             BlockPos lower = place(helper, WaystoneOrigin.WILDERNESS);
             helper.assertTrue(helper.getLevel().destroyBlock(lower, false), "Tweak switch did not disable protection");
         } finally {
             TweaksConfig.WAYSTONE_PROTECTION.set(original);
-            Protection.refresh();
+            WaystoneProtection.refresh();
         }
         helper.succeed();
     }

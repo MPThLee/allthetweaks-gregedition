@@ -1,6 +1,7 @@
-package dev.mpthlee.allthetweaks;
+package dev.mpthlee.allthetweaks.tweak.waystones;
 
-import dev.mpthlee.allthetweaks.compat.WaystoneRules;
+import dev.mpthlee.allthetweaks.TweaksConfig;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -10,11 +11,11 @@ import net.minecraftforge.fml.ModList;
 import java.util.function.Supplier;
 
 /** Optional integration boundary. No Waystones types are resolved on the disabled path. */
-public final class Protection {
+public final class WaystoneProtection {
     private static volatile boolean enabled;
     private static final ThreadLocal<Bypass> CREATIVE = new ThreadLocal<>();
 
-    private Protection() {}
+    private WaystoneProtection() {}
 
     public static void refresh() {
         enabled = ModList.get().isLoaded("waystones")

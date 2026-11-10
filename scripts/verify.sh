@@ -14,13 +14,23 @@ if ! grep -q 'aoestillremovesadjacentordinaryblocks failed! AoE removed protecte
     exit 1
 fi
 
+printf '%s\n' 'Checking the broom flight baseline (cleanup disabled)...'
+if ./gradlew runGameTestServer -PbroomFlightEnabled=false --console=plain > "$report_dir/broom-baseline.log" 2>&1; then
+    printf '%s\n' 'ERROR: broom baseline unexpectedly passed.' >&2
+    exit 1
+fi
+if ! grep -q 'dimensionteleportimmediatelyaftermountrevokesflight failed! Dismounted broom rider retained flight' "$report_dir/broom-baseline.log"; then
+    printf '%s\n' "ERROR: baseline did not reproduce the broom bug; inspect $report_dir/broom-baseline.log" >&2
+    exit 1
+fi
+
 printf '%s\n' 'Building the mod and running protection/compatibility tests...'
 if ! ./gradlew build runGameTestServer --console=plain > "$report_dir/protected.log" 2>&1; then
     tail -60 "$report_dir/protected.log"
     exit 1
 fi
-printf '%s\n' 'Checking startup and mining without Waystones or Balm...'
-if ! ./gradlew runGameTestServer -PwithoutWaystones --console=plain > "$report_dir/optional.log" 2>&1; then
+printf '%s\n' 'Checking startup and mining without optional mods...'
+if ! ./gradlew runGameTestServer -PwithoutOptionalMods --console=plain > "$report_dir/optional.log" 2>&1; then
     tail -60 "$report_dir/optional.log"
     exit 1
 fi

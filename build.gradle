@@ -10,16 +10,18 @@ plugins {
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.mpthlee.allthetweaks'
-version = '0.1.0'
+version = '0.2.0'
+def tweakMixinConfigs = ['allthetweaks_gregedition.waystones.mixins.json', 'allthetweaks_gregedition.broom.mixins.json']
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 def forgeVersion = providers.gradleProperty('forgeVersion').getOrElse('47.3.0')
 def balmVersion = providers.gradleProperty('balmVersion').getOrElse('7.3.38')
-def gameTestDir = file('run-gametest/' + (providers.gradleProperty('withoutWaystones').isPresent()
-        ? 'without-waystones' : 'with-waystones'))
+def withoutOptionalMods = providers.gradleProperty('withoutOptionalMods').isPresent() || providers.gradleProperty('withoutWaystones').isPresent()
+def gameTestDir = file('run-gametest/' + (withoutOptionalMods
+        ? 'without-optional-mods' : 'with-optional-mods'))
 
 sourceSets {
     gametest {
-        if (providers.gradleProperty('withoutWaystones').isPresent()) {
+        if (withoutOptionalMods) {
             java.setSrcDirs(['src/smoke/java'])
         }
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
@@ -66,25 +68,29 @@ dependencies {
     minecraft "net.minecraftforge:forge:1.20.1-${forgeVersion}"
     compileOnly fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
     compileOnly fg.deobf("maven.modrinth:balm:${balmVersion}+forge-1.20.1")
-    if (!providers.gradleProperty('withoutWaystones').isPresent()) {
+    compileOnly fg.deobf('maven.modrinth:evilcraft:1.20.1-1.3.5')
+    compileOnly fg.deobf('maven.modrinth:cyclops-core:1.20.1-1.22.3')
+    if (!withoutOptionalMods) {
         runtimeOnly fg.deobf('maven.modrinth:waystones:14.1.21+forge-1.20.1')
         runtimeOnly fg.deobf("maven.modrinth:balm:${balmVersion}+forge-1.20.1")
+        runtimeOnly fg.deobf('maven.modrinth:evilcraft:1.20.1-1.3.5')
+        runtimeOnly fg.deobf('maven.modrinth:cyclops-core:1.20.1-1.22.3')
     }
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 mixin {
     add sourceSets.main, 'allthetweaks_gregedition.refmap.json'
-    config 'allthetweaks_gregedition.mixins.json'
+    tweakMixinConfigs.each { config it }
 }
 
 tasks.named('jar', Jar) {
-    manifest.attributes('MixinConfigs': 'allthetweaks_gregedition.mixins.json')
+    manifest.attributes('MixinConfigs': tweakMixinConfigs.join(','))
     finalizedBy 'reobfJar'
 }
 tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
 
-tasks.register('prepareWaystoneRegressionConfig') {
+tasks.register('prepareTweakRegressionConfig') {
     doLast {
         // Only generated regression worlds live here; never reuse a modded world for the optional-mod test.
         delete new File(gameTestDir, 'world')
@@ -95,11 +101,11 @@ generatedWaystonesUnbreakable = true
 restrictToCreative = false
 '''
         new File(gameTestDir, 'config/allthetweaks_gregedition-common.toml').text =
-                "[tweaks]\nwaystoneProtection = ${providers.gradleProperty('protectionEnabled').getOrElse('true')}\n"
+                "[tweaks]\nwaystoneProtection = ${providers.gradleProperty('protectionEnabled').getOrElse('true')}\nbroomFlightCleanup = ${providers.gradleProperty('broomFlightEnabled').getOrElse('true')}\n"
     }
 }
 tasks.matching { it.name == 'runGameTestServer' }.configureEach {
-    dependsOn 'prepareWaystoneRegressionConfig'
+    dependsOn 'prepareTweakRegressionConfig'
     doLast {
         def log = new File(gameTestDir, 'logs/latest.log').text
         def expected = sourceSets.gametest.allJava.files.sum { it.text.count('@GameTest(') }
