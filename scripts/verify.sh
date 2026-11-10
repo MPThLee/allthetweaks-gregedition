@@ -34,6 +34,11 @@ if ! ./gradlew runGameTestServer -PwithoutOptionalMods --console=plain > "$repor
     tail -60 "$report_dir/optional.log"
     exit 1
 fi
+printf '%s\n' 'Checking EvilCraft flight with the Mekanism cache used by ATM9 Expert...'
+if ! ./gradlew runGameTestServer -PmekanismBroomTest -PforgeVersion=47.4.10 -PbalmVersion=7.3.44 --console=plain > "$report_dir/mekanism-broom.log" 2>&1; then
+    tail -60 "$report_dir/mekanism-broom.log"
+    exit 1
+fi
 printf '%s\n' 'Checking the Forge and Balm versions from ATM9 Expert 0.7.1...'
 if ! ./gradlew runGameTestServer -PforgeVersion=47.4.10 -PbalmVersion=7.3.44 --console=plain > "$report_dir/pack-versions.log" 2>&1; then
     tail -60 "$report_dir/pack-versions.log"

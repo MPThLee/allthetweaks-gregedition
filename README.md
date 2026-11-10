@@ -56,6 +56,11 @@ an ability update. Forge dimension transfers that retain a broom in the old worl
 also detach that stale ride. Command teleports and ordinary dismounts use the same
 cleanup; there is no periodic player scan or blanket flight reset on teleport.
 
+When Mekanism 10.4 is installed, releasing the broom's flight also refreshes
+Mekanism's flight cache through its normal API. Otherwise, its dimension-change
+handler can restore the broom's cached permission after dismount cleanup. This
+interaction was reproduced in ATM9 Expert 0.7.2 and in a focused integration test.
+
 Creative/spectator flight and survival flight present before mounting are preserved.
 Vanilla's shared flight boolean cannot identify another mod granting or revoking
 flight during an existing ride; this is not a general flight-provider arbitration
@@ -65,7 +70,7 @@ The implementation targets [EvilCraft 1.3.5's broom lifecycle](https://github.co
 ## Install and configure
 
 Build with `./gradlew build`, then put
-`build/libs/allthetweaks-gregedition-0.2.0.jar` in the server's `mods` directory
+`build/libs/allthetweaks-gregedition-0.2.1.jar` in the server's `mods` directory
 (or the local instance's `mods` directory for singleplayer). No client-only code
 or custom networking is added. Waystones and EvilCraft are optional; each integration
 stays inactive when its mod is absent. This build targets Waystones 14.1.21,
@@ -149,7 +154,9 @@ Verified on 2026-11-10:
 | Broom tweak disabled | Expected leaked flight reproduced |
 | Forge 47.3.0 / Balm 7.3.38 | All 40 tests passed |
 | ATM9 Expert versions: Forge 47.4.10 / Balm 7.3.44 | All 40 tests passed |
-| Without all four optional mods | Startup/mining smoke test passed |
+| With Mekanism 10.4.16.80 | All 43 tests passed; two new stale-cache tests failed before the cache-refresh fix |
+| ATM9 Expert 0.7.2 dedicated server + real client | `/home`, `/back`, `/spawn`: stale permission reproduced with cleanup disabled; 0.2.1 clears both sides |
+| Without optional mods | Startup/mining smoke test passed |
 | Release packaging | Build/reobfuscation passed; both mixin configs and all five mixins/refmap included; tests excluded |
 
 There are no tick handlers, world scans, stack inspection, or allocations on the

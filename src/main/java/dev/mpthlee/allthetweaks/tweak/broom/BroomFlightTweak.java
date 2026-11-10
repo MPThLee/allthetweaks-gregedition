@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 public final class BroomFlightTweak implements Tweak {
     private static volatile boolean enabled;
+    private static volatile boolean mekanismLoaded;
 
     @Override
     public void register(IEventBus forgeBus) {
@@ -26,9 +27,14 @@ public final class BroomFlightTweak implements Tweak {
 
     @Override
     public void refresh() {
+        mekanismLoaded = ModList.get().isLoaded("mekanism");
         enabled = ModList.get().isLoaded("evilcraft") && TweaksConfig.SPEC.isLoaded()
                 && TweaksConfig.BROOM_FLIGHT_CLEANUP.get();
     }
 
     public static boolean enabled() { return enabled; }
+
+    static void refreshFlightCache(ServerPlayer player) {
+        if (mekanismLoaded) MekanismFlightCompat.refresh(player);
+    }
 }

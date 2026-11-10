@@ -30,6 +30,7 @@ public final class BroomFlightLease {
         boolean allowed = previous || player.isCreative() || player.isSpectator();
         player.getAbilities().mayfly = allowed;
         player.getAbilities().flying = allowed && (player.isSpectator() || player.getAbilities().flying);
+        BroomFlightTweak.refreshFlightCache(player);
         player.onUpdateAbilities();
         return true;
     }
