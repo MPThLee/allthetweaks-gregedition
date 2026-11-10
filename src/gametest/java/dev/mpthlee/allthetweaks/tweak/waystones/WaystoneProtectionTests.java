@@ -33,6 +33,24 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @PrefixGameTestTemplate(false)
 public final class WaystoneProtectionTests {
     @GameTest(template = "empty")
+    public static void generatedWaystoneReportsUnbreakableHardness(GameTestHelper helper) {
+        BlockPos lower = place(helper, WaystoneOrigin.WILDERNESS);
+        for (BlockPos pos : new BlockPos[]{lower, lower.above()}) {
+            helper.assertTrue(helper.getLevel().getBlockState(pos).getDestroySpeed(helper.getLevel(), pos) < 0,
+                    "Protected Waystone must be excluded by miner hardness checks");
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
+    public static void playerWaystoneKeepsNormalHardness(GameTestHelper helper) {
+        BlockPos lower = place(helper, WaystoneOrigin.PLAYER);
+        helper.assertTrue(helper.getLevel().getBlockState(lower).getDestroySpeed(helper.getLevel(), lower) >= 0,
+                "Player Waystone was marked unbreakable");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty")
     public static void generatedLowerSurvivesDestroy(GameTestHelper helper) {
         checkProtected(helper, false, false);
     }
@@ -318,7 +336,7 @@ public final class WaystoneProtectionTests {
         helper.succeed();
     }
 
-    private static BlockPos place(GameTestHelper helper, WaystoneOrigin origin) {
+    static BlockPos place(GameTestHelper helper, WaystoneOrigin origin) {
         return place(helper, origin, ModBlocks.waystone);
     }
 

@@ -18,6 +18,8 @@ if another callback has already destroyed the other half or produced loot.
 
 This mod protects shared APIs rather than patching individual tools:
 
+- Reports unbreakable hardness for protected Waystones, letting AoE planners skip them
+  and finish mining surrounding blocks.
 - Cancels Forge break events for protected generated Waystones.
 - Cancels `Level.destroyBlock` before drops and callbacks run.
 - Rejects destructive `LevelChunk.setBlockState` calls, also covering ordinary
@@ -41,6 +43,9 @@ The coverage is independent of tool name and AoE shape. Mods that directly modif
 chunk-section storage or invent and spawn item stacks without normal loot APIs can
 still bypass these hooks. This is not a claim that every mod in the full pack has
 been individually playtested.
+
+See the [full-pack tool/miner comparison with Unbreakables 1.20.1](docs/waystone-mining-comparison.md)
+for the tested paths, separate configurations, and limits of those checks.
 
 ## EvilCraft broom flight cleanup
 
@@ -70,7 +75,7 @@ The implementation targets [EvilCraft 1.3.5's broom lifecycle](https://github.co
 ## Install and configure
 
 Build with `./gradlew build`, then put
-`build/libs/allthetweaks-gregedition-0.2.1.jar` in the server's `mods` directory
+`build/libs/allthetweaks-gregedition-0.2.2.jar` in the server's `mods` directory
 (or the local instance's `mods` directory for singleplayer). No client-only code
 or custom networking is added. Waystones and EvilCraft are optional; each integration
 stays inactive when its mod is absent. This build targets Waystones 14.1.21,
@@ -127,7 +132,7 @@ It also runs the enabled suite with Forge 47.4.10 and Balm 7.3.44 from the
 That manifest pins [Waystones 14.1.21](https://www.curseforge.com/minecraft/mc-mods/waystones/files/8849482)
 and [Balm 7.3.44](https://www.curseforge.com/minecraft/mc-mods/balm/files/8969708).
 
-The suite covers 40 real Minecraft/Forge GameTests. The 25 Waystone tests cover: removal APIs, events, early
+The suite covers 42 real Minecraft/Forge GameTests. The 27 Waystone tests cover: removal APIs, events, early
 callbacks, loot-before-removal, an AoE loop around ordinary blocks, all six Waystone
 variants, wilderness/village/dungeon origins, legacy data, configuration switches,
 creative mining and cleanup, and allowed state changes. The 15 broom tests cover immediate/after-tick teleports,
@@ -152,12 +157,13 @@ Verified on 2026-11-10:
 | --- | --- |
 | Waystone tweak disabled | Expected AoE destruction reproduced |
 | Broom tweak disabled | Expected leaked flight reproduced |
-| Forge 47.3.0 / Balm 7.3.38 | All 40 tests passed |
-| ATM9 Expert versions: Forge 47.4.10 / Balm 7.3.44 | All 40 tests passed |
-| With Mekanism 10.4.16.80 | All 43 tests passed; two new stale-cache tests failed before the cache-refresh fix |
+| Forge 47.3.0 / Balm 7.3.38 | All 42 tests passed |
+| ATM9 Expert versions: Forge 47.4.10 / Balm 7.3.44 | All 42 tests passed |
+| With Mekanism 10.4.16.80 | All 45 tests passed; two new stale-cache tests failed before the cache-refresh fix |
 | ATM9 Expert 0.7.2 dedicated server + real client | `/home`, `/back`, `/spawn`: stale permission reproduced with cleanup disabled; 0.2.1 clears both sides |
+| With GregTech 7.5.3 | All 44 tests passed, including lower/upper-half hammer AoE controls |
 | Without optional mods | Startup/mining smoke test passed |
-| Release packaging | Build/reobfuscation passed; both mixin configs and all five mixins/refmap included; tests excluded |
+| Release packaging | Build/reobfuscation passed; both mixin configs and all six mixins/refmap included; tests excluded |
 
 There are no tick handlers, world scans, stack inspection, or allocations on the
 ordinary-block mutation path. The enabled chunk guard adds one existing-state read

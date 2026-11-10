@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "allthetweaks_gregedition.refmap.json",
   "mixins": [
+    "BlockHardnessMixin",
     "LevelChunkMixin",
     "LevelMixin",
     "WaystoneBlockMixin",

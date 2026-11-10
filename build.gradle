@@ -10,7 +10,7 @@ plugins {
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.mpthlee.allthetweaks'
-version = '0.2.1'
+version = '0.2.2'
 def tweakMixinConfigs = ['allthetweaks_gregedition.waystones.mixins.json', 'allthetweaks_gregedition.broom.mixins.json']
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 def forgeVersion = providers.gradleProperty('forgeVersion').getOrElse('47.3.0')
@@ -21,6 +21,9 @@ def gameTestDir = file('run-gametest/' + (withoutOptionalMods
 
 sourceSets {
     gametest {
+        if (providers.gradleProperty('aoeTestClient').isPresent()) {
+            java.srcDir 'src/aoetest/java'
+        }
         if (providers.gradleProperty('mekanismBroomTest').isPresent()) {
             java.srcDir 'src/mekanismtest/java'
         }
