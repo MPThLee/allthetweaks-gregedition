@@ -97,6 +97,8 @@ Balm 7.3.38, EvilCraft 1.3.5, Cyclops Core 1.22.3, and Forge 47.3.0.
 ./gradlew runGameTestServer -PforgeVersion=47.4.10 -PbalmVersion=7.3.44
 # Interactive AoE testing with GregTech CEu 7.5.3 and JEI 15.59.0.210:
 ./gradlew runClient -PforgeVersion=47.4.10 -PbalmVersion=7.3.44 -PaoeTestClient
+# Add the pack's FTB Essentials teleport commands for interactive testing:
+./gradlew runClient -PforgeVersion=47.4.10 -PbalmVersion=7.3.44 -PaoeTestClient -PteleportTestClient
 # Full disabled/enabled/optional-dependency verification:
 ./scripts/verify.sh
 ```
@@ -132,6 +134,12 @@ EvilCraft, or Cyclops Core and checks ordinary mining.
 These are headless integration tests with the real mod entities and Minecraft APIs;
 they do not constitute a full-pack interactive client playtest of every `/back` or
 `/spawn` command provider.
+
+The broom tests explicitly set the player's active `flying` flag to exercise cleanup
+of that state. A real broom ride does not necessarily set that flag. Consequently,
+those tests establish the cleanup contract and immediate-mount race, not a complete
+reproduction of visible infinite flight in the modpack. See
+[the manual FTB command test results](docs/broom-manual-testing.md).
 
 Verified on 2026-11-10:
 

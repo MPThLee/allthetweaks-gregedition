@@ -59,6 +59,10 @@ minecraft {
 
 repositories {
     maven {
+        url = 'https://www.cursemaven.com'
+        content { includeGroup 'curse.maven' }
+    }
+    maven {
         url = 'https://api.modrinth.com/maven'
         content { includeGroup 'maven.modrinth' }
     }
@@ -78,6 +82,11 @@ dependencies {
         if (providers.gradleProperty('aoeTestClient').isPresent()) {
             runtimeOnly fg.deobf('maven.modrinth:gregtechceu-modern:mc1.20.1-7.5.3')
             runtimeOnly fg.deobf('maven.modrinth:jei:15.59.0.210')
+        }
+        if (providers.gradleProperty('teleportTestClient').isPresent()) {
+            runtimeOnly fg.deobf('curse.maven:ftb-essentials-410811:7609948')
+            runtimeOnly fg.deobf('curse.maven:ftb-library-404465:8226927')
+            runtimeOnly fg.deobf('maven.modrinth:architectury-api:9.2.14+forge')
         }
     }
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
